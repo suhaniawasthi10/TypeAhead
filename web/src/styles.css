@@ -1,0 +1,370 @@
+/* ============================================================================
+   TypeAhead — warm charcoal theme. Calm, typographic, intentional.
+   Muted amber accent used sparingly. Crisp 1px borders, no glow, ghost button.
+   Single forced theme (not OS-dependent). Styling only — no behavior here.
+   ========================================================================== */
+
+:root {
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  /* warm charcoal — brown-leaning greys, not blue-black */
+  --bg: #1a1816;
+  --surface: #211e1a;
+  --surface-2: #1f1c19;
+  --text: #ece8e2;
+  --text-muted: #a59d93;
+  --text-faint: #756d63;
+  --border: #322d28;
+  --border-strong: #443c34;
+
+  /* muted amber — desaturated, never neon, never glowing */
+  --accent: #c98a3b;
+  --accent-hover: #d89a4a;
+  --accent-tint: rgba(201, 138, 59, 0.1);
+  --danger: #d4897a;
+
+  --radius: 10px;
+  --radius-sm: 7px;
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---- layout: anchored high, constrained column ----------------------------- */
+.page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 15vh 24px 8vh;
+}
+.shell {
+  width: 100%;
+  max-width: 640px;
+}
+
+/* ---- masthead / wordmark --------------------------------------------------- */
+.masthead {
+  margin-bottom: 30px;
+}
+.wordmark {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  color: var(--text);
+}
+/* small amber block beside the wordmark — a quiet terminal-cursor mark */
+.wordmark::after {
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-left: 9px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: translateY(-1px);
+}
+.tagline {
+  margin: 7px 0 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  color: var(--text-faint);
+}
+
+/* ---- controls row (toggle) ------------------------------------------------- */
+.controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  user-select: none;
+}
+.switch-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  margin: 0;
+}
+.switch-track {
+  position: relative;
+  width: 34px;
+  height: 19px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--border-strong);
+  transition: background 140ms ease;
+}
+.switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #ece8e2;
+  transition: transform 140ms ease;
+}
+.switch-input:checked + .switch-track {
+  background: var(--accent);
+}
+.switch-input:checked + .switch-track .switch-thumb {
+  transform: translateX(15px);
+}
+.switch-input:focus-visible + .switch-track {
+  outline: 1.5px solid var(--accent);
+  outline-offset: 2px;
+}
+.switch-text {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ---- search (the hero) ----------------------------------------------------- */
+.search {
+  position: relative;
+}
+.search-bar {
+  display: flex;
+  gap: 9px;
+}
+.search-input {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 16px;
+  font-family: var(--sans);
+  font-size: 16px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  /* crisp border change on focus — NO soft glow halo */
+  transition: border-color 130ms ease;
+}
+.search-input::placeholder {
+  color: var(--text-faint);
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.search-btn {
+  padding: 0 18px;
+  flex: none;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  /* ghost button — not a filled neon CTA blob */
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color 130ms ease, border-color 130ms ease;
+}
+.search-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.search-btn:focus-visible {
+  outline: 1.5px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- dropdown: attached to the search bar ---------------------------------- */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  margin: 0;
+  padding: 5px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  animation: dropIn 110ms ease both;
+}
+@keyframes dropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.dropdown-status {
+  padding: 13px 16px;
+  font-size: 14px;
+}
+.status-loading {
+  color: var(--text-muted);
+}
+.status-error {
+  color: var(--danger);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 90ms ease;
+}
+.option.active {
+  background: var(--accent-tint);
+}
+.option-title {
+  font-size: 14.5px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* the matched prefix is what the user typed — quietly emphasised in amber */
+.option-title .match {
+  color: var(--accent);
+  font-weight: 500;
+}
+.option.active .option-title {
+  color: var(--text);
+}
+.option-count {
+  flex: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+/* ---- submit confirmation --------------------------------------------------- */
+.submit-msg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+.submit-tick {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ---- trending: quiet secondary block --------------------------------------- */
+/* de-carded: just a hairline rule above + the label, so the search stays the hero */
+.trending {
+  margin-top: 44px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.trending-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.trending h2 {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.trending-hint {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+}
+.trending-empty {
+  margin: 10px 0 14px;
+  font-size: 13.5px;
+  color: var(--text-faint);
+}
+.trending-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.trending-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 9px 0;
+  border-top: 1px solid var(--border);
+}
+.trending-row:first-child {
+  border-top: none;
+}
+.trending-rank {
+  flex: none;
+  width: 15px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-faint);
+}
+.trending-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.trending-score {
+  flex: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+}
+
+/* ---- responsive ------------------------------------------------------------ */
+@media (max-width: 560px) {
+  .page {
+    padding: 9vh 16px 6vh;
+  }
+  .wordmark {
+    font-size: 24px;
+  }
+}
+
+/* ---- respect reduced motion ------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

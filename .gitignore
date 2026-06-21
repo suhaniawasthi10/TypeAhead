@@ -1,0 +1,11 @@
+node_modules/
+web/node_modules/
+data/*.db
+data/*.db-*
+data/*.tsv.gz
+data/*.tsv
+*.log
+.DS_Store
+BUILD.md
+CLAUDE.md
+prompt.md
