@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Suggestion = { query: string; count: number };
 
@@ -47,12 +47,27 @@ export function App() {
   const [trendingMode, setTrendingMode] = useState(false); // basic vs trending ranking
   const [trendingList, setTrendingList] = useState<Array<{ query: string; score: number }>>([]);
 
+  // When a query is selected/submitted we set the input value to it; this ref tells the
+  // debounced /suggest effect to skip that one value so the dropdown doesn't re-open.
+  // Cleared on real typing (onChange) so normal suggestions keep working.
+  const suppressSuggestRef = useRef<string | null>(null);
+
   const debouncedQuery = useDebounce(query, 150);
 
   // Fetch suggestions whenever the DEBOUNCED prefix changes. We abort the previous
   // request so a slow earlier response can't overwrite a newer one (race safety).
   useEffect(() => {
     const prefix = debouncedQuery.trim();
+
+    // A selection/submit just set the input to this exact value — don't re-open the
+    // dropdown for it. Consume the guard so it only suppresses this one value, once.
+    if (suppressSuggestRef.current !== null && suppressSuggestRef.current === prefix) {
+      suppressSuggestRef.current = null;
+      setSuggestions([]);
+      setLoading(false);
+      return;
+    }
+
     if (prefix.length === 0) {
       setSuggestions([]);
       setError(null);
@@ -100,6 +115,9 @@ export function App() {
   async function submitSearch(term: string) {
     const t = term.trim();
     if (!t) return;
+    // Every submit path (suggestion select, Enter, Search button) records the value here so
+    // the debounce can't re-open the dropdown for it. Fires POST /search exactly once.
+    suppressSuggestRef.current = t;
     setSuggestions([]);
     setActiveIndex(-1);
     try {
@@ -119,6 +137,14 @@ export function App() {
     }
   }
 
+  // Selecting a suggestion — click OR Enter on a highlighted row — uses ONE shared path:
+  // reflect it in the input and submit it once (submitSearch closes the dropdown + guards
+  // the re-open). Click and keyboard therefore behave identically.
+  function selectSuggestion(value: string) {
+    setQuery(value);
+    submitSearch(value);
+  }
+
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -127,10 +153,10 @@ export function App() {
       e.preventDefault();
       setActiveIndex((i) => Math.max(i - 1, -1));
     } else if (e.key === "Enter") {
-      // If a suggestion is highlighted, submit that; otherwise submit the raw input.
+      // If a suggestion is highlighted, SELECT it (same path as a click); otherwise submit
+      // the raw typed input.
       if (activeIndex >= 0 && suggestions[activeIndex]) {
-        setQuery(suggestions[activeIndex].query);
-        submitSearch(suggestions[activeIndex].query);
+        selectSuggestion(suggestions[activeIndex].query);
       } else {
         submitSearch(query);
       }
@@ -172,7 +198,10 @@ export function App() {
               type="text"
               placeholder="Search Wikipedia titles…"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                suppressSuggestRef.current = null; // real typing — allow suggestions again
+                setQuery(e.target.value);
+              }}
               onKeyDown={onKeyDown}
               autoFocus
               role="combobox"
@@ -201,8 +230,7 @@ export function App() {
                   onMouseDown={(e) => {
                     // onMouseDown (not onClick) so it fires before the input blurs.
                     e.preventDefault();
-                    setQuery(s.query);
-                    submitSearch(s.query);
+                    selectSuggestion(s.query);
                   }}
                 >
                   <span className="option-title">
