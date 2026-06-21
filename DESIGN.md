@@ -133,7 +133,7 @@ instance with three logical nodes (`node0`, `node1`, `node2`); the node a prefix
 simply becomes the **key prefix** on the real Redis key — `ring.lookup("lond") = "node1"`
 ⇒ key `node1:suggest:lond`. So the ring genuinely decides the partition (verified: `lond`→
 node0, `mic`→node1, `lon`→node2, …). At planet scale each logical node is a separate Redis
-server; the mechanism is identical (CLAUDE.md §14).
+server; the mechanism is identical (see the Future scope section).
 
 **Why consistent hashing instead of `hash(key) % N`:** with modulo, the owning node is a
 function of `N`. Change `N` (add or remove a cache node) and almost every key's `% N` value
@@ -162,7 +162,7 @@ purely as a fast, well-distributed hash, not for security), then **binary-search
 sorted ring for the first point with `hash ≥ keyHash`, wrapping to the first point if the
 key is past the end. O(log R) where R = nodes × vnodes. (`src/ring.ts` `lookup()`.)
 
-**Note vs the notes (CLAUDE.md §10):** the notes sketch **first-N-letter sharding** for the
+**Note vs the notes:** the notes sketch **first-N-letter sharding** for the
 *data store* (e.g. all "a*" prefixes on one shard). That's a fine static partition, but it
 doesn't survive node add/remove gracefully and skews with letter frequency. The assignment
 asks for **consistent hashing on the cache**, which both balances load (via virtual nodes)
@@ -171,8 +171,8 @@ the explicit ring rather than leaning on any "hashing is automatic" hand-wave.
 
 **Weakness I'll own:** logical nodes on one Redis process don't give real fault isolation —
 if that process dies, all "nodes" die. It demonstrates the *partitioning mechanism*, not
-physical redundancy. Real multi-node Redis would add that; out of scope locally (§14... see
-Future Scope).
+physical redundancy. Real multi-node Redis would add that; out of scope locally (see the
+Future scope section).
 
 ## 4. Trending / recency
 
@@ -193,7 +193,7 @@ where `recent_count` is the number of searches for that query during the period.
   score drops below a small threshold the entry is deleted, so the tracker is self-cleaning.
 - **Demonstrated** (`scripts/trending-demo.ts`): 5/period climbs 5 → 9.5 → 13.55 → … → 28.5
   (toward 50), then on going quiet decays back down and is **dropped** once below threshold.
-- **Rejected alternative (CLAUDE.md §12):** separate total/week/day counters merged by a
+- **Rejected alternative:** separate total/week/day counters merged by a
   scoring function. One decayed score is cleaner — a single number, self-cleaning, no
   windows to roll.
 
