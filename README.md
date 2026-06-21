@@ -7,7 +7,6 @@ real 35M-row dataset, with batched writes.
 - **Design rationale (the graded deliverable):** [DESIGN.md](./DESIGN.md)
 - **API reference:** [API.md](./API.md)
 - **Performance report:** [PERFORMANCE.md](./PERFORMANCE.md)
-- **Build plan / milestone log:** [BUILD.md](./BUILD.md)
 
 ---
 
